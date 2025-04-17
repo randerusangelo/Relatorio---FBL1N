@@ -98,7 +98,7 @@ if st.button("Consultar SAP"):
             elif not df2.empty:
                 df_export = df2.copy()
             else:
-                st.error("Nenhum dado encontrado nos dois serviços.")
+                st.error("Nenhum dado foi encontrado .")
                 st.stop()
 
             colunas_reordenadas = [
@@ -106,7 +106,8 @@ if st.button("Consultar SAP"):
                 "NUMFORNECEDOR",
                 "NUMDOC",
                 "TPDOC",
-                "MONTIMI",
+                "DATADOC",
+                "MONTMI",
                 "DOCCOMPANS",
                 "TEXTO"
             ]
@@ -114,8 +115,25 @@ if st.button("Consultar SAP"):
             colunas_desordenadas = [col for col in colunas_reordenadas if col in df_export.columns]
             df_export = df_export[colunas_desordenadas + [col for col in df_export.columns if col not in colunas_desordenadas]]
 
-            st.success(f" {len(df_export)} registros encontrados")
+
+            if "MONTMI" in df_export.columns:
+                df_export["MONTMI"] = pd.to_numeric(df_export["MONTMI"], errors="coerce")
+                df_export["MONTMI"] = df_export["MONTMI"].apply(
+                    lambda x: f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") if pd.notnull(x) else ""
+    )
+            # Renomeando colunas para exibição
+            df_export = df_export.rename(columns={
+                "NOMEFORNECEDOR": "NOME",
+                "NUMFORNECEDOR": "Nº. Fornec.",
+                "NUMDOC": "Nº. DOC",
+                "MONTMI": "Mont.Mi. (R$)",
+                "DOCCOMPANS": "DOCCOMPENS"
+            })
+
+            
+            st.success(f"🧮 {len(df_export)} registros encontrados!")
             st.dataframe(df_export)
+
 
             if not df_export.empty:
                with st.expander("📥 Exportar"):
@@ -125,7 +143,7 @@ if st.button("Consultar SAP"):
                    output.seek(0)
 
                    st.download_button(
-                       label="📤 Baixar Excel (.xlsx)",
+                       label="📤 Baixar Planilha Excel (.xlsx)",
                        data=output.getvalue(),
                        file_name="consulta_financeira.xlsx",
                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
