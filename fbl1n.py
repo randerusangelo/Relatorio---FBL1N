@@ -6,6 +6,7 @@ import altair as alt
 import re
 from datetime import datetime, date
 import io
+from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
 ODATA_URL = st.secrets["odatas"]["ODATA_URL"]
 ODATA_URL2 = st.secrets["odatas"]["ODATA_URL2"]
@@ -115,13 +116,11 @@ if st.button("Consultar SAP"):
             colunas_desordenadas = [col for col in colunas_reordenadas if col in df_export.columns]
             df_export = df_export[colunas_desordenadas + [col for col in df_export.columns if col not in colunas_desordenadas]]
 
-
             if "MONTMI" in df_export.columns:
                 df_export["MONTMI"] = pd.to_numeric(df_export["MONTMI"], errors="coerce")
                 df_export["MONTMI"] = df_export["MONTMI"].apply(
                     lambda x: f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") if pd.notnull(x) else ""
-    )
-            # Renomeando colunas para exibição
+     )
             df_export = df_export.rename(columns={
                 "NOMEFORNECEDOR": "NOME",
                 "NUMFORNECEDOR": "Nº. Fornec.",
@@ -129,11 +128,41 @@ if st.button("Consultar SAP"):
                 "MONTMI": "Mont.Mi. (R$)",
                 "DOCCOMPANS": "DOCCOMPENS"
             })
+            if "Mont.Mi. (R$)" in df_export.columns:
+                largura = df_export["Mont.Mi. (R$)"].map(len).max()
+                df_export["Mont.Mi. (R$)"] = df_export["Mont.Mi. (R$)"].apply(lambda x: x.rjust(largura))
 
-            
+            locale_text = {
+                "sortAscending": "Ordenar ascendente",
+                "sortDescending": "Ordenar descendente",
+                "hideColumn": "Ocultar coluna",
+                "filterOoo": "Filtrar...",
+                "equals": "Igual a",
+                "notEqual": "Diferente de",
+                "contains": "Contém",
+                "Contains": "Contém",
+                "startsWith": "Começa com",
+                "endsWith": "Termina com",
+                "noRowsToShow": "Nenhuma linha para mostrar"
+            }
+
+            if "TPDOC" in df_export.columns:
+             df_export["TPDOC"] = df_export["TPDOC"].fillna("").astype(str)
+
+            opcoes_tpdoc = df_export["TPDOC"].dropna().unique().tolist()
+            gb = GridOptionsBuilder.from_dataframe(df_export)
+            gb.configure_default_column(filter=False) 
+            gb.configure_column("TPDOC", header_name="TPDOC", filter="agSetColumnFilter", filterParams={"values": opcoes_tpdoc})
+            gb.configure_column("Mont.Mi. (R$)", type=["numericColumn", "rightAligned"])
+            grid_options = gb.build()
             st.success(f"🧮 {len(df_export)} registros encontrados!")
-            st.dataframe(df_export)
-
+            AgGrid(df_export,
+                gridOptions=grid_options,
+                enable_enterprise_modules=False,
+                update_mode=GridUpdateMode.NO_UPDATE,
+                fit_columns_on_grid_load=True,
+                height=500,)
+            #st.dataframe(df_export)
 
             if not df_export.empty:
                with st.expander("📥 Exportar"):
