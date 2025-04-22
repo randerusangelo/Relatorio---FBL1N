@@ -22,7 +22,7 @@ def formatar_data_sap(date_str):
     return date_str
 
 st.set_page_config(page_title="Ops Finan Forn", layout="wide")
-st.title("💰 Operações Financeiras de Fornecedores - v 1.0")
+st.title("💰 Operações Financeiras de Fornecedores - v 1.0.1 - FBL1N")
 
 if "data_ini" not in st.session_state:
     st.session_state["data_ini"] = date.today().replace(day=1)
@@ -174,7 +174,7 @@ if st.button("Consultar SAP"):
                    st.download_button(
                        label="📤 Baixar Planilha Excel (.xlsx)",
                        data=output.getvalue(),
-                       file_name="consulta_financeira.xlsx",
+                       file_name="extrato_fbl1n.xlsx",
                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                    )
 
