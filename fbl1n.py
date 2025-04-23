@@ -8,6 +8,8 @@ from datetime import datetime, date
 import io
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
+from PIL import Image
+
 ODATA_URL = st.secrets["odatas"]["ODATA_URL"]
 ODATA_URL2 = st.secrets["odatas"]["ODATA_URL2"]
 
@@ -22,7 +24,15 @@ def formatar_data_sap(date_str):
     return date_str
 
 st.set_page_config(page_title="Ops Finan Forn", layout="wide")
-st.title("💰 Operações Financeiras de Fornecedores - v 1.0.1 - FBL1N")
+
+
+col1, col2 = st.columns([1, 16])
+with col1:
+    logo = Image.open("LOGO_USA_ORIGINAL_SEM_FUNDO.png")
+    st.image(logo, width=70)  
+
+with col2:
+    st.title("Operações Financeiras de Fornecedores - v 1.0.1 - FBL1N")
 
 if "data_ini" not in st.session_state:
     st.session_state["data_ini"] = date.today().replace(day=1)
@@ -99,7 +109,7 @@ if st.button("Consultar SAP"):
             elif not df2.empty:
                 df_export = df2.copy()
             else:
-                st.error("Nenhum dado foi encontrado .")
+                st.error("Nenhum dado foi encontrado.")
                 st.stop()
 
             colunas_reordenadas = [
@@ -140,7 +150,6 @@ if st.button("Consultar SAP"):
                 "equals": "Igual a",
                 "notEqual": "Diferente de",
                 "contains": "Contém",
-                "Contains": "Contém",
                 "startsWith": "Começa com",
                 "endsWith": "Termina com",
                 "noRowsToShow": "Nenhuma linha para mostrar"
@@ -162,7 +171,6 @@ if st.button("Consultar SAP"):
                 update_mode=GridUpdateMode.NO_UPDATE,
                 fit_columns_on_grid_load=True,
                 height=500,)
-            #st.dataframe(df_export)
 
             if not df_export.empty:
                with st.expander("📥 Exportar"):
