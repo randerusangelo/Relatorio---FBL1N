@@ -7,7 +7,6 @@ import re
 from datetime import datetime, date
 import io
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
-
 from PIL import Image
 
 ODATA_URL = st.secrets["odatas"]["ODATA_URL"]
@@ -47,12 +46,16 @@ with st.sidebar:
     st.caption(f"Selecionado: {data_fim.strftime('%d/%m/%Y')}")
     tipo_filtro = st.selectbox("Filtrar por:", ["Número do Fornecedor", "Nome do Fornecedor"])
     valor_filtro = st.text_input("Digite o valor:", "")
+    opcoes_tpdoc_sidebar = ["ZP", "ZC", "RE", "TODOS"]
+    filtro_tpdoc = st.selectbox("Escolha o tipo de documento:", opcoes_tpdoc_sidebar, index=0)  # ZP como padrão
+    st.caption(f"Selecionado: {filtro_tpdoc}")
 
     if st.button("Salvar Filtros"):
         st.session_state["data_ini"] = data_ini
         st.session_state["data_fim"] = data_fim
         st.session_state["tipo_filtro"] = tipo_filtro
         st.session_state["valor_filtro"] = valor_filtro
+        st.session_state["filtro_tpdoc"] = filtro_tpdoc
         st.success("Filtros salvos!")
 
 st.subheader("📊 Resultado da Consulta")
@@ -71,6 +74,10 @@ if st.button("Consultar SAP"):
                 headers["lifnr"] = str(valor_filtro).strip()
             elif tipo_filtro == "Nome do Fornecedor":
                 headers["name1"] = str(valor_filtro).strip()
+
+            filtro_tpdoc_final = st.session_state.get("filtro_tpdoc", "ZP")
+            if filtro_tpdoc_final != "TODOS":
+                headers["tpdoc"] = filtro_tpdoc_final
 
             response =  requests.get(
                 ODATA_URL,
