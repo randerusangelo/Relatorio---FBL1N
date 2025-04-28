@@ -169,7 +169,6 @@ if st.button("Consultar SAP"):
             opcoes_tpdoc = df_export["TPDOC"].dropna().unique().tolist()
             gb = GridOptionsBuilder.from_dataframe(df_export)
             gb.configure_default_column(filter=False) 
-            #testando ord datas
             gb.configure_column("TPDOC", header_name="TPDOC", filter="agSetColumnFilter", filterParams={"values": df_export["TPDOC"].dropna().unique().tolist()},maxWidth=80)
             gb.configure_column("DATADOC", header_name="DataDoc", type=["dateColumnFilter", "customDateTimeFormat"], custom_format_string="dd/MM/yy", pivot=True, maxWidth=150, sortable=True, sort="desc", sortIndex=0)
             gb.configure_column("Mont.Mi. (R$)", type=["numericColumn", "rightAligned"],maxWidth=200)
