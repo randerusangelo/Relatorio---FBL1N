@@ -119,16 +119,7 @@ if st.button("Consultar SAP"):
                 st.error("Nenhum dado foi encontrado.")
                 st.stop()
             
-            colunas_reordenadas = [
-                "NOMEFORNECEDOR",
-                "NUMFORNECEDOR",
-                "NUMDOC",
-                "TPDOC",
-                "DATADOC",
-                "MONTMI",
-                "DOCCOMPANS",
-                "TEXTO"
-            ]
+            colunas_reordenadas = [ "NOMEFORNECEDOR", "NUMFORNECEDOR", "NUMDOC", "TPDOC", "DATADOC", "MONTMI", "DOCCOMPANS", "TEXTO"]
 
             colunas_desordenadas = [col for col in colunas_reordenadas if col in df_export.columns]
             df_export = df_export[colunas_desordenadas + [col for col in df_export.columns if col not in colunas_desordenadas]]
@@ -138,29 +129,14 @@ if st.button("Consultar SAP"):
                 df_export["MONTMI"] = df_export["MONTMI"].apply(
                     lambda x: f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") if pd.notnull(x) else ""
      )
-            df_export = df_export.rename(columns={
-                "NOMEFORNECEDOR": "NOME",
-                "NUMFORNECEDOR": "Nº. Fornec.",
-                "NUMDOC": "Nº. DOC",
-                "MONTMI": "Mont.Mi. (R$)",
-                "DOCCOMPANS": "DOCCOMPENS"
+            df_export = df_export.rename(columns={"NOMEFORNECEDOR": "NOME","NUMFORNECEDOR": "Nº. Fornec.","NUMDOC": "Nº. DOC","MONTMI": "Mont.Mi. (R$)","DOCCOMPANS": "DOCCOMPENS"
             })
 
             if "Mont.Mi. (R$)" in df_export.columns:
                 largura = df_export["Mont.Mi. (R$)"].map(len).max()
                 df_export["Mont.Mi. (R$)"] = df_export["Mont.Mi. (R$)"].apply(lambda x: x.rjust(largura))
 
-            locale_text = {
-                "sortAscending": "Ordenar ascendente",
-                "sortDescending": "Ordenar descendente",
-                "hideColumn": "Ocultar coluna",
-                "filterOoo": "Filtrar...",
-                "equals": "Igual a",
-                "notEqual": "Diferente de",
-                "contains": "Contém",
-                "startsWith": "Começa com",
-                "endsWith": "Termina com",
-                "noRowsToShow": "Nenhuma linha para mostrar"
+            locale_text = {"sortAscending": "Ordenar ascendente","sortDescending": "Ordenar descendente","hideColumn": "Ocultar coluna","filterOoo": "Filtrar...","equals": "Igual a","notEqual": "Diferente de","contains": "Contém","startsWith": "Começa com","endsWith": "Termina com","noRowsToShow": "Nenhuma linha para mostrar"
             }
 
             if "TPDOC" in df_export.columns:
