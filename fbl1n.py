@@ -177,7 +177,9 @@ if st.button("Consultar SAP"):
                 rowSelection='single',  
                 rowClassRules={
                     "row-selected": "params.node.isSelected()"
-                }
+                },
+                suppressCellSelection=True,
+                enableCellTextSelection=True,
             )
 
             grid_options = gb.build()
@@ -188,7 +190,8 @@ if st.button("Consultar SAP"):
                 update_mode=GridUpdateMode.NO_UPDATE,
                 fit_columns_on_grid_load=True,
                 height=500,
-                allow_unsafe_jscode=True,)
+                allow_unsafe_jscode=True,
+                )
 
             if not df_export.empty:
                with st.expander("📥 Exportar"):
