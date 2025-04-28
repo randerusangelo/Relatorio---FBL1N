@@ -19,7 +19,7 @@ def formatar_data_sap(date_str):
     match = re.search(r'/Date\((\d+)\)/', date_str)
     if match:
         timestamp = int(match.group(1)) // 1000
-        return datetime.utcfromtimestamp(timestamp).strftime("%d/%m/%Y")
+        return datetime.utcfromtimestamp(timestamp) #.strftime("%d/%m/%Y") -> testar
     return date_str
 
 st.set_page_config(page_title="Ops Finan Forn", layout="wide")
@@ -31,7 +31,7 @@ with col1:
     st.image(logo, width=70)  
 
 with col2:
-    st.title("Operações Financeiras de Fornecedores - v 1.0.1 - FBL1N")
+    st.title("Operações Financeiras de Fornecedores - v 1.0.2 - FBL1N")
 
 if "data_ini" not in st.session_state:
     st.session_state["data_ini"] = date.today().replace(day=1)
@@ -47,7 +47,7 @@ with st.sidebar:
     tipo_filtro = st.selectbox("Filtrar por:", ["Número do Fornecedor", "Nome do Fornecedor"])
     valor_filtro = st.text_input("Digite o valor:", "")
     opcoes_tpdoc_sidebar = ["ZP", "ZC", "RE", "TODOS"]
-    filtro_tpdoc = st.selectbox("Escolha o tipo de documento:", opcoes_tpdoc_sidebar, index=0)  # ZP como padrão
+    filtro_tpdoc = st.selectbox("Escolha o tipo de documento:", opcoes_tpdoc_sidebar, index=0)
     st.caption(f"Selecionado: {filtro_tpdoc}")
 
     if st.button("Salvar Filtros"):
@@ -118,7 +118,7 @@ if st.button("Consultar SAP"):
             else:
                 st.error("Nenhum dado foi encontrado.")
                 st.stop()
-
+            
             colunas_reordenadas = [
                 "NOMEFORNECEDOR",
                 "NUMFORNECEDOR",
@@ -145,6 +145,7 @@ if st.button("Consultar SAP"):
                 "MONTMI": "Mont.Mi. (R$)",
                 "DOCCOMPANS": "DOCCOMPENS"
             })
+
             if "Mont.Mi. (R$)" in df_export.columns:
                 largura = df_export["Mont.Mi. (R$)"].map(len).max()
                 df_export["Mont.Mi. (R$)"] = df_export["Mont.Mi. (R$)"].apply(lambda x: x.rjust(largura))
@@ -168,8 +169,17 @@ if st.button("Consultar SAP"):
             opcoes_tpdoc = df_export["TPDOC"].dropna().unique().tolist()
             gb = GridOptionsBuilder.from_dataframe(df_export)
             gb.configure_default_column(filter=False) 
-            gb.configure_column("TPDOC", header_name="TPDOC", filter="agSetColumnFilter", filterParams={"values": opcoes_tpdoc})
-            gb.configure_column("Mont.Mi. (R$)", type=["numericColumn", "rightAligned"])
+            #testando ord datas
+            gb.configure_column("TPDOC", header_name="TPDOC", filter="agSetColumnFilter", filterParams={"values": df_export["TPDOC"].dropna().unique().tolist()},maxWidth=80)
+            gb.configure_column("DATADOC", header_name="DataDoc", type=["dateColumnFilter", "customDateTimeFormat"], custom_format_string="dd/MM/yy", pivot=True, maxWidth=150, sortable=True, sort="desc", sortIndex=0)
+            gb.configure_column("Mont.Mi. (R$)", type=["numericColumn", "rightAligned"],maxWidth=200)
+            gb.configure_grid_options(
+                rowSelection='single',  
+                rowClassRules={
+                    "row-selected": "params.node.isSelected()"
+                }
+            )
+
             grid_options = gb.build()
             st.success(f"🧮 {len(df_export)} registros encontrados!")
             AgGrid(df_export,
@@ -177,7 +187,8 @@ if st.button("Consultar SAP"):
                 enable_enterprise_modules=False,
                 update_mode=GridUpdateMode.NO_UPDATE,
                 fit_columns_on_grid_load=True,
-                height=500,)
+                height=500,
+                allow_unsafe_jscode=True,)
 
             if not df_export.empty:
                with st.expander("📥 Exportar"):
