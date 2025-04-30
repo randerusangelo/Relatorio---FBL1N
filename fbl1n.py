@@ -19,7 +19,7 @@ def formatar_data_sap(date_str):
     match = re.search(r'/Date\((\d+)\)/', date_str)
     if match:
         timestamp = int(match.group(1)) // 1000
-        return datetime.utcfromtimestamp(timestamp) #.strftime("%d/%m/%Y") -> testar
+        return datetime.utcfromtimestamp(timestamp)
     return date_str
 
 st.set_page_config(page_title="Ops Finan Forn", layout="wide")
@@ -31,7 +31,7 @@ with col1:
     st.image(logo, width=70)  
 
 with col2:
-    st.title("Operações Financeiras de Fornecedores - v 1.0.2 - FBL1N")
+    st.title("Operações Financeiras de Fornecedores - v 1.0.3 - FBL1N")
 
 if "data_ini" not in st.session_state:
     st.session_state["data_ini"] = date.today().replace(day=1)
@@ -46,7 +46,7 @@ with st.sidebar:
     st.caption(f"Selecionado: {data_fim.strftime('%d/%m/%Y')}")
     tipo_filtro = st.selectbox("Filtrar por:", ["Número do Fornecedor", "Nome do Fornecedor"])
     valor_filtro = st.text_input("Digite o valor:", "")
-    opcoes_tpdoc_sidebar = ["ZP", "ZC", "RE", "TODOS"]
+    opcoes_tpdoc_sidebar = ["ZP", "ZC", "RE", "RV", "TODOS"]
     filtro_tpdoc = st.selectbox("Escolha o tipo de documento:", opcoes_tpdoc_sidebar, index=0)
     st.caption(f"Selecionado: {filtro_tpdoc}")
 
@@ -171,6 +171,10 @@ if st.button("Consultar SAP"):
             if not df_export.empty:
                with st.expander("📥 Exportar"):
                    output = io.BytesIO()
+
+                   if "DATADOC" in df_export.columns:
+                        df_export["DATADOC"] = df_export["DATADOC"].dt.strftime("%d/%m/%Y")    
+
                    with pd.ExcelWriter(output, engine="openpyxl") as writer:
                        df_export.to_excel(writer, index=False, sheet_name="OpFinan")
                    output.seek(0)
@@ -181,7 +185,7 @@ if st.button("Consultar SAP"):
                        file_name="extrato_fbl1n.xlsx",
                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                    )
-
+                
         except Exception as e:
             st.error("Erro ao conectar ou processar os dados.")
             st.exception(e)
