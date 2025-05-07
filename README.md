@@ -81,4 +81,4 @@ openpyxl
 
 ## ✨ Autor
 
-Desenvolvido por [Rander Felipe, Analista Jr] com foco em integração leve com o SAP via OData.
+Desenvolvido por [Rander Felipe, Analista Jr] com foco em integração com o SAP S4HANA via OData.
