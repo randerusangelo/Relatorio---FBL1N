@@ -73,7 +73,7 @@ openpyxl
 
 ## 📝 Observações
 
-- As datas filtram pelo campo **BUDAT** , relacionado a datas de Lançamento e não a data do Documento em si.
+- As datas filtram pelo campo **BLDAT** , relacionado a datas expressas no documento em si e não datas onde foram lançados.
 - Os registros dos dois ambientes são mesclados e duplicatas eliminadas.
 - Os serviços OData devem estar acessíveis e publicados (ambiente produtivo).
 
